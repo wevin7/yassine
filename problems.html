@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problèmes</title>
+    <link rel="stylesheet" href="problems.css">
+</head>
+
+<body>
+    <main>
+        <article>
+            <form id="problemForm">
+                <label for="type-problem">Chosie votre problem :</label>
+                <select id="type-problem" required>
+                    <option value="">-- Sélectionnez --</option>
+                    <option value="emploi-du-temps">Problème d'emploi du temps</option>
+                    <option value="retard-cours">Retard des cours</option>
+                    <option value="annulation-cours">Annulation des cours</option>
+                    <option value="charge-travail">Charge de travail trop élevée</option>
+                    <option value="absence">Problème d'absence</option>
+                    <option value="formateur-absent">Formateur absent</option>
+                    <option value="formateur-comportement">Comportement du formateur</option>
+                    <option value="formateur-explication">Mauvaise explication du cours</option>
+                    <option value="formateur-note">Problème avec la notation</option>
+                    <option value="autre">Autre</option>
+                </select>
+                <label for="problems">Décrivez votre problème :</label>
+                <textarea id="problems" required placeholder="Écrivez votre problème ici..."></textarea>
+
+                <button type="submit">Envoyer</button>
+            </form>
+        </article>
+    </main>
+    <!-- POPUP -->
+    <div id="popup">
+        <div class="popup-box">
+            <img src="./yes-green.png" class="popup-logo">
+            <p>Merci pour votre participation !</p>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1Twu-yJDYtzN-k0DGq0H3AMGJeyjk6QuqQ1vXOE_yycAjW3AEJEsV8oau0RqKHOHN1w/exec";
+
+        const form = document.getElementById("problemForm");
+        const popup = document.getElementById("popup");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const type = document.getElementById("type-problem").value;
+            const desc = document.getElementById("problems").value.trim();
+
+            let nom = localStorage.getItem("nom") || "";
+            let prenom = localStorage.getItem("prenom") || "";
+            let hide = localStorage.getItem("hide") === "true";
+
+            const name = hide ? "Anonyme" : ((nom || prenom) ? (nom + " " + prenom).trim() : "Anonyme");
+
+            if (!type || !desc) {
+                alert("Veuillez remplir tous les champs.");
+                return;
+            }
+
+            const payload = {
+                name: name,
+                category: type,
+                description: desc
+            };
+
+            try {
+                const res = await fetch(SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                // no-cors => cannot read response, so we assume success
+                popup.classList.add("show");
+                form.reset();
+                setTimeout(() => popup.classList.remove("show"), 2500);
+                return;
+
+
+                popup.classList.add("show");
+                form.reset();
+                setTimeout(() => popup.classList.remove("show"), 2500);
+
+            } catch (err) {
+                console.error(err);
+                alert("Erreur lors de l'envoi. Réessayez.");
+            }
+        });
+    </script>
+</body>
+
+</html>

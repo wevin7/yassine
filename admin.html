@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Problèmes</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            background: #f3f5f7;
+        }
+
+        header {
+            background: #0b5fa4;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        #list {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 10px;
+        }
+
+        .box {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            border-left: 6px solid #0b5fa4;
+            transition: 0.2s;
+        }
+
+        .box:hover {
+            transform: translateX(5px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .box h3 {
+            margin: 0;
+            color: #0b5fa4;
+            font-size: 22px;
+        }
+
+        .box p {
+            margin: 6px 0;
+            font-size: 15px;
+            color: #333;
+        }
+
+        .date {
+            font-size: 13px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .empty {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 20px;
+            color: #666;
+        }
+
+        .type-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 8px;
+            margin-top: 5px;
+            font-size: 13px;
+            color: white;
+        }
+
+        .absence {
+            background: #d9534f;
+        }
+
+        .pv {
+            background: #f0ad4e;
+        }
+
+        .formation {
+            background: #5bc0de;
+        }
+
+        .prof {
+            background: #5cb85c;
+        }
+
+        .connexion {
+            background: #337ab7;
+        }
+
+        .autre {
+            background: #555;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>📋 Liste des problèmes signalés</header>
+
+    <div id="list"></div>
+
+    <script>
+        // رابط السكريبت (ديرو صحيح بلا تعليقات فالنفس السطر)
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzlvwg8TVyGu7pEk7FxhfXzdjtDhQq_L1pmIsZnB1hrOQBDQrXu204TkwXFV5Qsaql6Ww/exec";
+
+        const container = document.getElementById("list");
+
+        // تحميل البيانات من السيرفر
+        async function loadFromServer() {
+            container.innerHTML = "<p class='empty'>Chargement...</p>";
+
+            try {
+                const res = await fetch(SCRIPT_URL + "?action=list", {
+                    method: "GET",
+                    mode: "cors"
+                });
+
+                if (!res.ok) throw new Error("HTTP error " + res.status);
+
+                const data = await res.json();
+
+                if (data.result !== "success") {
+                    throw new Error("API error");
+                }
+
+                const entries = data.entries || [];
+
+                if (entries.length === 0) {
+                    container.innerHTML = "<p class='empty'>Aucun problème signalé pour le moment.</p>";
+                    return;
+                }
+
+                container.innerHTML = "";
+
+                entries.forEach(p => {
+                    // تنسيق التاريخ
+                    const dt = p.timestamp ? new Date(p.timestamp) : null;
+                    const dateStr = dt ? dt.toLocaleString() : "";
+
+                    const typeClass = (p.category || "autre").replace(/\s+/g, '-').toLowerCase();
+
+                    container.innerHTML += `
+                <div class="box">
+                    <h3>${escapeHtml(p.name || "Anonyme")}</h3>
+                    <p><span class="type-tag ${typeClass}">${escapeHtml(p.category)}</span></p>
+                    <p><b>Description :</b><br>${escapeHtml(p.description)}</p>
+                    <p class="date">📅 ${escapeHtml(dateStr)}</p>
+                </div>
+                `;
+                });
+
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = "<p class='empty'>Erreur en chargeant les données.</p>";
+            }
+        }
+
+        // حماية ضد الأكواد
+        function escapeHtml(text) {
+            if (!text) return "";
+            return text.toString()
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#39;");
+        }
+
+        // تحميل عند فتح الصفحة
+        loadFromServer();
+
+        // تحديث كل 30 ثانية (اختياري)
+        setInterval(loadFromServer, 30000);
+    </script>
+
+
+</body>
+
+</html>

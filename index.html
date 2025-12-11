@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="index.css" />
+    <title>Login</title>
+</head>
+
+<body>
+
+    <header>
+        <img class="logo-left" src="./OFPPT.png" alt="OFPPT" />
+        <img class="logo-right" src="./Capture_décran_2025-12-11_123134-removebg-preview.png" alt="PIE" />
+    </header>
+
+    <article>
+        <form id="loginForm">
+            <input type="text" id="nom" placeholder="Nom" required>
+            <input type="text" id="prenom" placeholder="Prénom" required>
+
+            <label class="checkbox-label">
+                <input type="checkbox" id="hideName">
+                <span>Ne pas afficher mon nom</span>
+            </label>
+
+            <button type="submit">Se connecter</button>
+        </form>
+    </article>
+    <script>
+        const loginForm = document.getElementById("loginForm");
+
+        loginForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            let nom = document.getElementById("nom").value;
+            let prenom = document.getElementById("prenom").value;
+            let hide = document.getElementById("hideName").checked;
+
+            // حفظ المعلومات عندك بوحدك
+            localStorage.setItem("nom", nom);
+            localStorage.setItem("prenom", prenom);
+            localStorage.setItem("hide", hide);
+
+            window.location.href = "problems.html"; // انتقال بدون refresh للول صفحة
+        });
+    </script>
+</body>
+
+</html>
