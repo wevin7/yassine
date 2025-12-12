@@ -101,6 +101,21 @@
         .autre {
             background: #555;
         }
+
+        .delete-btn {
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            margin-top: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .delete-btn:hover {
+            background: #e60000;
+        }
     </style>
 </head>
 
@@ -111,17 +126,51 @@
     <div id="list"></div>
 
     <script>
-        // رابط السكريبت (ديرو صحيح بلا تعليقات فالنفس السطر)
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzlvwg8TVyGu7pEk7FxhfXzdjtDhQq_L1pmIsZnB1hrOQBDQrXu204TkwXFV5Qsaql6Ww/exec";
 
-        const container = document.getElementById("list");
+        // ===============================
+        //  رابط السكريبت ديالك
+        // ===============================
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxu_Wo0NWI7NlsLDND8ZLkCcbQNBuz_F3d3AE3I-whTREEbE-cG5OXY_4A0emt9FaquIw/exec";
 
-        // تحميل البيانات من السيرفر
-        async function loadFromServer() {
-            container.innerHTML = "<p class='empty'>Chargement...</p>";
+        // ===============================
+        //  حذف عنصر
+        // ===============================
+        async function deleteRow(row) {
+
+            if (!confirm("Voulez-vous vraiment supprimer cet élément ?")) return;
 
             try {
-                const res = await fetch(SCRIPT_URL + "?action=list", {
+                const res = await fetch(`${SCRIPT_URL}?action=delete&row=${row}`, {
+                    method: "GET",
+                    mode: "cors"
+                });
+
+                const data = await res.json();
+
+                if (data.result === "deleted") {
+                    alert("Élément supprimé !");
+                    loadFromServer(); // إعادة تحميل القائمة
+                } else {
+                    alert("Erreur lors de la suppression.");
+                }
+
+            } catch (err) {
+                console.error(err);
+                alert("Erreur réseau.");
+            }
+        }
+
+        // ===============================
+        //  تحميل البيانات
+        // ===============================
+        const container = document.getElementById("list");
+
+        async function loadFromServer() {
+
+            container.innerHTML = `<p class="empty">Chargement...</p>`;
+
+            try {
+                const res = await fetch(`${SCRIPT_URL}?action=list`, {
                     method: "GET",
                     mode: "cors"
                 });
@@ -130,43 +179,45 @@
 
                 const data = await res.json();
 
-                if (data.result !== "success") {
-                    throw new Error("API error");
-                }
+                if (data.result !== "success") throw new Error("API error");
 
                 const entries = data.entries || [];
 
                 if (entries.length === 0) {
-                    container.innerHTML = "<p class='empty'>Aucun problème signalé pour le moment.</p>";
+                    container.innerHTML = `<p class="empty">Aucun problème signalé pour le moment.</p>`;
                     return;
                 }
 
                 container.innerHTML = "";
 
                 entries.forEach(p => {
-                    // تنسيق التاريخ
+
                     const dt = p.timestamp ? new Date(p.timestamp) : null;
                     const dateStr = dt ? dt.toLocaleString() : "";
-
-                    const typeClass = (p.category || "autre").replace(/\s+/g, '-').toLowerCase();
 
                     container.innerHTML += `
                 <div class="box">
                     <h3>${escapeHtml(p.name || "Anonyme")}</h3>
-                    <p><span class="type-tag ${typeClass}">${escapeHtml(p.category)}</span></p>
+                    <p><span class="type-tag">${escapeHtml(p.category)}</span></p>
                     <p><b>Description :</b><br>${escapeHtml(p.description)}</p>
                     <p class="date">📅 ${escapeHtml(dateStr)}</p>
+
+                    <button class="delete-btn" onclick="deleteRow(${p.row})">
+                        Supprimer
+                    </button>
                 </div>
-                `;
+            `;
                 });
 
             } catch (err) {
                 console.error(err);
-                container.innerHTML = "<p class='empty'>Erreur en chargeant les données.</p>";
+                container.innerHTML = `<p class="empty">Erreur en chargeant les données.</p>`;
             }
         }
 
-        // حماية ضد الأكواد
+        // ===============================
+        // حماية النصوص
+        // ===============================
         function escapeHtml(text) {
             if (!text) return "";
             return text.toString()
@@ -177,11 +228,13 @@
                 .replaceAll("'", "&#39;");
         }
 
-        // تحميل عند فتح الصفحة
+        // ===============================
+        // تشغيل عند فتح الصفحة
+        // ===============================
         loadFromServer();
-
         // تحديث كل 30 ثانية (اختياري)
         setInterval(loadFromServer, 30000);
+
     </script>
 
 
