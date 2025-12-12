@@ -34,18 +34,34 @@
         loginForm.addEventListener("submit", (e) => {
             e.preventDefault();
 
-            let nom = document.getElementById("nom").value;
-            let prenom = document.getElementById("prenom").value;
+            let nom = document.getElementById("nom").value.trim();
+            let prenom = document.getElementById("prenom").value.trim();
             let hide = document.getElementById("hideName").checked;
 
-            // حفظ المعلومات عندك بوحدك
+            // 👇👇 اسم المستخدم الخاص بالـ admin (بدّلو كيف بغيتي)
+            const ADMIN_NAME = "admin";
+
+            // -------------------------
+            // 🔵 تسجيل دخول الـ Admin
+            // -------------------------
+            if (nom === ADMIN_NAME) {
+                localStorage.setItem("isAdmin", "true");
+                alert("Bienvenue Admin !");
+                window.location.href = "admin.html";
+                return;
+            }
+
+            // -------------------------
+            // 🟢 تسجيل دخول مستخدم عادي
+            // -------------------------
+            localStorage.setItem("isAdmin", "false");
             localStorage.setItem("nom", nom);
             localStorage.setItem("prenom", prenom);
             localStorage.setItem("hide", hide);
 
-            window.location.href = "problems.html"; // انتقال بدون refresh للول صفحة
+            window.location.href = "problems.html";
         });
     </script>
-</body>
+
 
 </html>
