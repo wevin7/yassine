@@ -121,6 +121,13 @@
 
 <body>
 
+    <script>
+        if (localStorage.getItem("isAdmin") !== "true") {
+            alert("Accès refusé !");
+            window.location.href = "index.html";
+        }
+    </script>
+
     <header>📋 Liste des problèmes signalés</header>
 
     <div id="list"></div>
