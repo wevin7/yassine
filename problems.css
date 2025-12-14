@@ -69,7 +69,7 @@ select option:checked {
   background: #dbe7ff !important;
 }
 textarea {
-    width: 94%;
+    width: 92%;
     padding: 10px;
     border-radius: 8px;
     border: 1px solid #c8d6e5;
@@ -199,5 +199,6 @@ footer{
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
 
 
