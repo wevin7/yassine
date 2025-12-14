@@ -30,7 +30,12 @@
                 <label for="problems">Décrivez votre problème :</label>
                 <textarea id="problems" required placeholder="Écrivez votre problème ici..."></textarea>
 
-                <button type="submit">Envoyer</button>
+                <button id="submitBtn" type="submit" class="submit-btn">
+                    <span class="btn-text">Envoyer</span>
+                    <span class="spinner"></span>
+                </button>
+                
+
             </form>
         </article>
     </main>
@@ -47,6 +52,7 @@
 
         const form = document.getElementById("problemForm");
         const popup = document.getElementById("popup");
+        const submitBtn = document.getElementById("submitBtn");
 
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -58,12 +64,18 @@
             let prenom = localStorage.getItem("prenom") || "";
             let hide = localStorage.getItem("hide") === "true";
 
-            const name = hide ? "Anonyme" : ((nom || prenom) ? (nom + " " + prenom).trim() : "Anonyme");
+            const name = hide
+                ? "Anonyme"
+                : ((nom || prenom) ? (nom + " " + prenom).trim() : "Anonyme");
 
             if (!type || !desc) {
                 alert("Veuillez remplir tous les champs.");
                 return;
             }
+
+            // ✅ هنا بالضبط كيبدا loading (من بعد الضغط)
+            submitBtn.classList.add("loading");
+            submitBtn.disabled = true;
 
             const payload = {
                 name: name,
@@ -72,33 +84,32 @@
             };
 
             try {
-                const res = await fetch(SCRIPT_URL, {
+                await fetch(SCRIPT_URL, {
                     method: "POST",
                     mode: "no-cors",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
                 });
 
-                // no-cors => cannot read response, so we assume success
+                // ✅ منين يطلع popup نحبسو
                 popup.classList.add("show");
                 form.reset();
-                setTimeout(() => popup.classList.remove("show"), 2500);
-                return;
 
+                submitBtn.classList.remove("loading");
+                submitBtn.disabled = false;
 
-                popup.classList.add("show");
-                form.reset();
                 setTimeout(() => popup.classList.remove("show"), 2500);
 
             } catch (err) {
                 console.error(err);
-                alert("Erreur lors de l'envoi. Réessayez.");
+                alert("Erreur lors de l'envoi.");
+
+                submitBtn.classList.remove("loading");
+                submitBtn.disabled = false;
             }
         });
     </script>
+
 </body>
 
-
 </html>
-
-
